@@ -1,0 +1,76 @@
+{
+  "boardType": "Arduino UNO R4 WiFi",
+  "devices": [
+    {
+      "id": "inflate_pump_1",
+      "name": "充气泵1",
+      "type": "pump",
+      "pin": 5,
+      "mode": "pwm",
+      "pwmFrequency": 490,
+      "maxPower": 100,
+      "description": "主充气泵，用于快速充气"
+    },
+    {
+      "id": "inflate_pump_2",
+      "name": "充气泵2", 
+      "type": "pump",
+      "pin": 6,
+      "mode": "pwm",
+      "pwmFrequency": 490,
+      "maxPower": 100,
+      "description": "辅助充气泵，用于精细调节"
+    },
+    {
+      "id": "exhaust_pump_1",
+      "name": "抽气泵1",
+      "type": "pump", 
+      "pin": 10,
+      "mode": "pwm",
+      "pwmFrequency": 490,
+      "maxPower": 100,
+      "description": "主抽气泵，用于快速排气"
+    },
+    {
+      "id": "exhaust_pump_2",
+      "name": "抽气泵2",
+      "type": "pump",
+      "pin": 11, 
+      "mode": "pwm",
+      "pwmFrequency": 490,
+      "maxPower": 100,
+      "description": "辅助抽气泵，用于精细调节"
+    },
+    {
+      "id": "valve_1",
+      "name": "电磁阀1",
+      "type": "valve",
+      "pin": 2,
+      "mode": "digital",
+      "description": "主控制阀门"
+    },
+    {
+      "id": "valve_2", 
+      "name": "电磁阀2",
+      "type": "valve",
+      "pin": 4,
+      "mode": "digital", 
+      "description": "辅助控制阀门"
+    }
+  ],
+  "wifiConfig": {
+    "ssid": "FishControl_WiFi",
+    "password": "fish2025",
+    "channel": 1,
+    "maxConnections": 4
+  },
+  "serialConfig": {
+    "baudRate": 115200,
+    "autoDetect": true
+  },
+  "systemConfig": {
+    "commandTimeout": 50,
+    "heartbeatInterval": 1000,
+    "maxRetries": 3
+  }
+}

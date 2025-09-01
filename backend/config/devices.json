@@ -1,0 +1,78 @@
+{
+  "boardType": "Arduino UNO R4 WiFi",
+  "devices": [
+    {
+      "id": "inflate_pump_1",
+      "maxPower": 100,
+      "name": "充气泵1",
+      "type": "pump",
+      "description": "主充气泵，用于快速充气",
+      "mode": "pwm",
+      "pin": 5,
+      "pwmFrequency": 490,
+      "createdAt": "2025-08-31T13:43:37.889Z",
+      "updatedAt": "2025-08-31T13:43:37.889Z"
+    },
+    {
+      "id": "inflate_pump_2",
+      "maxPower": 100,
+      "name": "充气泵2",
+      "type": "pump",
+      "description": "辅助充气泵，用于精细调节",
+      "mode": "pwm",
+      "pin": 6,
+      "pwmFrequency": 490,
+      "createdAt": "2025-08-31T13:43:37.889Z",
+      "updatedAt": "2025-08-31T13:43:37.889Z"
+    },
+    {
+      "id": "exhaust_pump_1",
+      "maxPower": 100,
+      "name": "抽气泵1",
+      "type": "pump",
+      "description": "主抽气泵，用于快速排气",
+      "mode": "pwm",
+      "pin": 10,
+      "pwmFrequency": 490,
+      "createdAt": "2025-08-31T13:43:37.889Z",
+      "updatedAt": "2025-08-31T13:43:37.889Z"
+    },
+    {
+      "id": "exhaust_pump_2",
+      "maxPower": 100,
+      "name": "抽气泵2",
+      "type": "pump",
+      "description": "辅助抽气泵，用于精细调节",
+      "mode": "pwm",
+      "pin": 11,
+      "pwmFrequency": 490,
+      "createdAt": "2025-08-31T13:43:37.889Z",
+      "updatedAt": "2025-08-31T13:43:37.889Z"
+    },
+    {
+      "id": "valve_1",
+      "name": "电磁阀1",
+      "pin": 2,
+      "description": "主控制阀门",
+      "type": "valve",
+      "mode": "digital",
+      "createdAt": "2025-08-31T13:43:37.889Z",
+      "updatedAt": "2025-08-31T13:43:37.889Z"
+    },
+    {
+      "id": "valve_2",
+      "name": "电磁阀2",
+      "pin": 4,
+      "description": "辅助控制阀门",
+      "type": "valve",
+      "mode": "digital",
+      "createdAt": "2025-08-31T13:43:37.889Z",
+      "updatedAt": "2025-08-31T13:43:37.889Z"
+    }
+  ],
+  "wifiConfig": {
+    "ssid": "FishControl_WiFi",
+    "password": "fish2025"
+  },
+  "lastUpdated": "2025-08-31T13:45:02.392Z"
+}

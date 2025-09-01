@@ -1,0 +1,72 @@
+{
+  "server": {
+    "port": 8080,
+    "host": "0.0.0.0",
+    "cors": {
+      "origin": "*",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "allowedHeaders": ["Content-Type", "Authorization"]
+    }
+  },
+  "database": {
+    "path": "./database/manta_control.db",
+    "backup": {
+      "enabled": true,
+      "interval": 3600000,
+      "maxBackups": 10
+    }
+  },
+  "logging": {
+    "level": "info",
+    "file": {
+      "enabled": true,
+      "path": "./logs",
+      "maxSize": "10m",
+      "maxFiles": 5
+    },
+    "console": {
+      "enabled": true,
+      "colorize": true
+    }
+  },
+  "network": {
+    "mdns": {
+      "enabled": true,
+      "serviceName": "fish",
+      "serviceType": "http"
+    },
+    "wifi": {
+      "autoDisconnect": true,
+      "reconnectAttempts": 3,
+      "reconnectDelay": 5000
+    }
+  },
+  "security": {
+    "rateLimit": {
+      "windowMs": 60000,
+      "max": 100
+    },
+    "commandValidation": {
+      "enabled": true,
+      "maxPowerValue": 100,
+      "maxTimeValue": 3600
+    }
+  },
+  "features": {
+    "taskScheduler": {
+      "enabled": true,
+      "maxConcurrentTasks": 10,
+      "precision": 100
+    },
+    "serialPort": {
+      "enabled": true,
+      "autoDetect": true,
+      "timeout": 5000
+    },
+    "codeGenerator": {
+      "enabled": true,
+      "templatePath": "./arduino/templates",
+      "outputPath": "./arduino/generated"
+    }
+  }
+}
