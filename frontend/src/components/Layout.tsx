@@ -37,52 +37,64 @@ export function Layout() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">
-                🐠 Manta Control Ultra
-              </h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                  </svg>
+                </div>
+                <h1 className="text-xl font-bold text-gray-900 hidden sm:block">
+                  Manta Control Ultra
+                </h1>
+                <h1 className="text-lg font-bold text-gray-900 sm:hidden">
+                  Manta
+                </h1>
+              </div>
             </div>
 
             {/* 状态指示器 */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {/* 连接状态 */}
-              <div className="flex items-center space-x-2">
-                <WifiIcon className={`h-5 w-5 ${
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <WifiIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${
                   connectionStatus.isConnected ? 'text-green-500' : 'text-red-500'
                 }`} />
-                <span className={`text-sm font-medium ${
+                <span className={`text-xs sm:text-sm font-medium ${
                   connectionStatus.isConnected ? 'text-green-700' : 'text-red-700'
-                }`}>
+                } hidden sm:inline`}>
                   {connectionStatus.isConnected ? '已连接' : '未连接'}
                 </span>
                 {connectionStatus.isConnected && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 hidden md:inline">
                     ({connectionStatus.clientCount}/{connectionStatus.maxClients})
                   </span>
                 )}
               </div>
 
               {/* 后端状态 */}
-              <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              <div className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 systemStatus.backend.isRunning
                   ? 'bg-green-100 text-green-800'
                   : 'bg-red-100 text-red-800'
               }`}>
-                <div className={`w-2 h-2 rounded-full mr-1.5 ${
+                <div className={`w-2 h-2 rounded-full mr-1 sm:mr-1.5 ${
                   systemStatus.backend.isRunning ? 'bg-green-400' : 'bg-red-400'
                 }`}></div>
-                后端 {systemStatus.backend.version}
+                <span className="hidden sm:inline">后端 {systemStatus.backend.version}</span>
+                <span className="sm:hidden">BE</span>
               </div>
 
               {/* Arduino状态 */}
-              <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              <div className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 systemStatus.arduino.isConnected
                   ? 'bg-blue-100 text-blue-800'
                   : 'bg-gray-100 text-gray-800'
               }`}>
-                <div className={`w-2 h-2 rounded-full mr-1.5 ${
+                <div className={`w-2 h-2 rounded-full mr-1 sm:mr-1.5 ${
                   systemStatus.arduino.isConnected ? 'bg-blue-400' : 'bg-gray-400'
                 }`}></div>
-                Arduino
+                <span className="hidden sm:inline">Arduino</span>
+                <span className="sm:hidden">AR</span>
               </div>
             </div>
           </div>
@@ -167,9 +179,9 @@ export function Layout() {
       </div>
 
       {/* 移动端底部导航 */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-pb">
         <nav className="flex">
-          {navigation.slice(0, 4).map((item) => {
+          {navigation.slice(0, 5).map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
@@ -181,8 +193,8 @@ export function Layout() {
                     : 'text-gray-600'
                 }`}
               >
-                <item.icon className="h-6 w-6 mb-1" />
-                <span className="truncate">{item.name}</span>
+                <item.icon className="h-5 w-5 mb-1" />
+                <span className="truncate text-xs">{item.name.length > 4 ? item.name.substring(0, 4) : item.name}</span>
               </Link>
             );
           })}
