@@ -317,8 +317,8 @@ export class DeviceController {
       for (const device of devices) {
         const command: DeviceCommand = {
           deviceId: device.id,
-          action: device.type === 'pump' ? 'set_power' : 'set_state',
-          value: device.type === 'pump' ? 0 : false,
+          action: device.type === 'pwm' ? 'set_power' : 'set_state',
+          value: device.type === 'pwm' ? 0 : false,
           timestamp: Date.now(),
           commandId: uuidv4()
         };

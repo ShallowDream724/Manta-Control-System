@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Logger } from 'winston';
 import { DeviceConfigService } from '../services/DeviceConfigService';
+import { ArduinoCodeGenerationService } from '../services/code-generation/CodeGenerationService';
 import type { DeviceConfig } from '../types/device';
 
 /**
@@ -8,10 +9,14 @@ import type { DeviceConfig } from '../types/device';
  * 处理设备配置的CRUD操作
  */
 export class DeviceConfigController {
+  private codeGenerator: ArduinoCodeGenerationService;
+
   constructor(
     private deviceConfigService: DeviceConfigService,
     private logger: Logger
-  ) {}
+  ) {
+    this.codeGenerator = new ArduinoCodeGenerationService(logger);
+  }
 
   /**
    * 获取所有设备配置
@@ -232,14 +237,8 @@ export class DeviceConfigController {
       errors.push('Pin number must be between 0 and 20');
     }
 
-    if (!config.mode) {
-      errors.push('Control mode is required');
-    } else if (!['pwm', 'digital'].includes(config.mode)) {
-      errors.push('Control mode must be "pwm" or "digital"');
-    }
-
     // PWM特定验证
-    if (config.mode === 'pwm') {
+    if (config.type === 'pwm') {
       if (!config.pwmFrequency || config.pwmFrequency < 1) {
         errors.push('PWM frequency must be greater than 0');
       }
@@ -335,4 +334,60 @@ export class DeviceConfigController {
       });
     }
   }
+
+  /**
+   * 生成Arduino代码
+   * POST /api/device-configs/generate-arduino
+   */
+  generateArduinoCode = async (req: Request, res: Response): Promise<void> => {
+    try {
+      this.logger.info('Generating Arduino code...');
+
+      // 获取所有设备配置
+      const devices = await this.deviceConfigService.getAllConfigs();
+
+      if (devices.length === 0) {
+        res.status(400).json({
+          success: false,
+          error: 'No devices configured'
+        });
+        return;
+      }
+
+      // 默认WiFi配置
+      const wifiConfig = {
+        ssid: 'FishControl_WiFi',
+        password: 'fish2025'
+      };
+
+      // 生成Arduino代码
+      const result = await this.codeGenerator.generateCode(devices, wifiConfig);
+
+      this.logger.info(`Arduino code generated successfully for ${devices.length} devices`);
+
+      res.json({
+        success: true,
+        data: {
+          code: result.code,
+          deviceCount: devices.length,
+          generatedAt: result.generatedAt.toISOString(),
+          devices: devices.map(d => ({
+            id: d.id,
+            name: d.name,
+            type: d.type,
+            pin: d.pin
+          })),
+          metadata: result.metadata,
+          validation: result.validation
+        }
+      });
+
+    } catch (error) {
+      this.logger.error('Failed to generate Arduino code:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate Arduino code'
+      });
+    }
+  };
 }

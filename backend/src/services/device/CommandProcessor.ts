@@ -220,10 +220,10 @@ export class CommandProcessor extends EventEmitter {
     // 检查命令参数
     switch (command.action) {
       case 'set_power':
-        if (device.type !== 'pump') {
+        if (device.type !== 'pwm') {
           return {
             isValid: false,
-            error: 'set_power only valid for pump devices'
+            error: 'set_power only valid for pwm devices'
           };
         }
         if (typeof command.value !== 'number' || command.value < 0 || command.value > 100) {
@@ -235,10 +235,10 @@ export class CommandProcessor extends EventEmitter {
         break;
 
       case 'set_state':
-        if (device.type !== 'valve') {
+        if (device.type !== 'digital') {
           return {
             isValid: false,
-            error: 'set_state only valid for valve devices'
+            error: 'set_state only valid for digital devices'
           };
         }
         if (typeof command.value !== 'boolean') {

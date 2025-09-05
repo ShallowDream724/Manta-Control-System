@@ -251,16 +251,11 @@ export class DeviceConfigService {
   /**
    * 根据类型获取设备配置
    */
-  async getConfigsByType(type: 'pump' | 'valve'): Promise<DeviceConfig[]> {
+  async getConfigsByType(type: 'pwm' | 'digital'): Promise<DeviceConfig[]> {
     return Array.from(this.configs.values()).filter(config => config.type === type);
   }
 
-  /**
-   * 根据控制模式获取设备配置
-   */
-  async getConfigsByMode(mode: 'pwm' | 'digital'): Promise<DeviceConfig[]> {
-    return Array.from(this.configs.values()).filter(config => config.mode === mode);
-  }
+
 
   /**
    * 获取配置统计信息
@@ -268,23 +263,19 @@ export class DeviceConfigService {
   async getConfigStats(): Promise<{
     total: number;
     byType: Record<string, number>;
-    byMode: Record<string, number>;
     usedPins: number[];
   }> {
     const configs = Array.from(this.configs.values());
-    
+
     const byType: Record<string, number> = {};
-    const byMode: Record<string, number> = {};
 
     configs.forEach(config => {
       byType[config.type] = (byType[config.type] || 0) + 1;
-      byMode[config.mode] = (byMode[config.mode] || 0) + 1;
     });
 
     return {
       total: configs.length,
       byType,
-      byMode,
       usedPins: configs.map(c => c.pin).sort((a, b) => a - b)
     };
   }

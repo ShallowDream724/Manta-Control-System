@@ -203,16 +203,16 @@ export class DeviceStateManager extends EventEmitter {
 
     switch (command.action) {
       case 'set_power':
-        if (device.type !== 'pump') {
-          this.logger.error('set_power only valid for pump devices');
+        if (device.type !== 'pwm') {
+          this.logger.error('set_power only valid for PWM devices');
           return;
         }
         newValue = command.value as number;
         break;
 
       case 'set_state':
-        if (device.type !== 'valve') {
-          this.logger.error('set_state only valid for valve devices');
+        if (device.type !== 'digital') {
+          this.logger.error('set_state only valid for digital devices');
           return;
         }
         newValue = command.value as boolean;
@@ -268,7 +268,7 @@ export class DeviceStateManager extends EventEmitter {
    * 获取设备默认值
    */
   private getDefaultValue(device: DeviceConfig): number | boolean {
-    return device.type === 'pump' ? 0 : false;
+    return device.type === 'pwm' ? 0 : false;
   }
 
   /**
@@ -315,7 +315,7 @@ export class DeviceStateManager extends EventEmitter {
     const active = states.filter(s => {
       const device = this.devices.get(s.deviceId);
       if (!device) return false;
-      return device.type === 'pump' ? (s.currentValue as number) > 0 : (s.currentValue as boolean);
+      return device.type === 'pwm' ? (s.currentValue as number) > 0 : (s.currentValue as boolean);
     }).length;
 
     return {

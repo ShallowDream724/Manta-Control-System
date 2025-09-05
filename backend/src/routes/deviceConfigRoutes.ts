@@ -28,6 +28,9 @@ export function createDeviceConfigRoutes(controller: DeviceConfigController): Ro
     }
   });
 
+  // 生成Arduino代码
+  router.post('/generate-arduino', (req, res) => controller.generateArduinoCode(req, res));
+
   // 导出配置
   router.get('/export', (req, res) => controller.exportConfigs(req, res));
 

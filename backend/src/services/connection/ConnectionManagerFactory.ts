@@ -1,6 +1,6 @@
 import winston from 'winston';
 import { SerialConnectionManager, SerialConfig } from './SerialConnectionManager';
-import { WiFiConnectionManager, WiFiConfig } from './WiFiConnectionManager';
+import { WiFiConnectionManager, WiFiConnectionConfig } from './WiFiConnectionManager';
 import { ConnectionConfig } from '../../types/device';
 
 /**

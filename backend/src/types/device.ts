@@ -3,9 +3,9 @@
 export interface DeviceConfig {
   id: string;
   name: string;
-  type: 'pump' | 'valve';
+  type: 'pwm' | 'digital';
   pin: number;
-  mode: 'pwm' | 'digital';
+  icon?: string;
   pwmFrequency?: number;
   maxPower?: number;
   description?: string;

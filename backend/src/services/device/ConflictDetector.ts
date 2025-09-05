@@ -281,7 +281,7 @@ export class ConflictDetector {
         const allStates = stateManager.getAllDeviceStates();
         const activePumps = allStates.filter(state => {
           const device = stateManager.getDeviceConfig(state.deviceId);
-          return device?.type === 'pump' && (state.currentValue as number) > 0;
+          return device?.type === 'pwm' && (state.currentValue as number) > 0;
         });
 
         if (activePumps.length >= 4) { // 最多同时运行4个泵
