@@ -1,4 +1,4 @@
-# Manta Control Ultra
+# Manta Control
 
 仿生蝠鲼控制系统（Arduino UNO R4 WiFi + 前后端）。
 
@@ -18,7 +18,6 @@
 
 - 代码生成器
   - 使用“设备配置页”当前设备列表（ID/引脚/类型）直接生成 Arduino UNO R4 WiFi 固件
-  - 不再重命名设备 ID，前后端/固件 ID 完全一致
   - WiFi 配置优先级：请求体 `wifiConfig` > `config/devices.json` > 默认值
 
 - 任务编排/执行
@@ -158,30 +157,7 @@ npm start
 - 打开“设备配置” → 点击“生成 Arduino 代码”
 - 复制到 Arduino IDE，选择开发板“Arduino UNO R4 WiFi”，安装所需库，烧录即可
 
-注意：UNO R4 WiFi 常用 PWM 引脚：`3,5,6,9,10,11`（模板会给出警告但不强制）。
-
----
-
-## 一体化自检（可选）
-
-提供了一个本地集成测试脚本（模拟 Arduino，不需要实际烧录）：
-
-```
-# 需要 Node.js 18+
-node integration_test.js
-```
-脚本会：
-- 启动模拟 Arduino（127.0.0.1:9001）
-- 编译并启动后端（端口 8099，指令转发到模拟 Arduino）
-- 验证：代码生成 / 任务下发 / 状态查询
-通过后输出：`Integration tests PASSED`。
-
----
-
-## 精度与移动端输入
-
-- 时间统一到 0.1s：输入时即四舍五入为一位小数；保存/调度为 100ms 整数
-- 移动端 number 输入移除了步进箭头，支持 `,` → `.` 的小数解析
+注意：UNO R4 WiFi 常用 PWM 引脚：`3,5,6,9,10,11`（模板会给出警告但不强制）
 
 ---
 
@@ -197,31 +173,6 @@ node integration_test.js
 - 任务未执行但后端成功？
   - 检查固件串口输出与后端日志；确认设备 ID 与配置页完全一致；确认持续时间大于 0
 
----
-
-## 目录结构（节选）
-```
-backend/
-  src/
-    controllers/
-    routes/
-    services/
-      code-generation/
-    types/
-frontend/
-  src/
-    components/
-      dashboard/    # 控制面板
-      config/       # 设备配置
-      task-orchestrator/
-    hooks/
-    services/
-config/
-  devices.json
-  system.json
-scripts/
-  integration_test.js   # 集成测试（本地）
-```
 
 ---
 
