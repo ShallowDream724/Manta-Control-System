@@ -149,12 +149,20 @@ const char* pass = "${wifiConfig.password}";`;
   }
 
   private generateDeviceConfig(devices: DeviceConfig[]): string {
-    const constants = devices.map(device => {
-      const constName = device.id.toUpperCase() + '_PIN';
-      return `const int ${constName} = ${device.pin};   // ${device.name}`;
+    const sanitizeIdentifier = (id: string) => {
+      // 转为大写，非字母数字转换为下划线，首字符非字母则前缀DEV_
+      let ident = id.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+      if (!/^[A-Z_]/.test(ident)) ident = 'DEV_' + ident;
+      return ident;
+    };
+
+    const constants = devices.map((device, index) => {
+      const constName = sanitizeIdentifier(device.id) + '_PIN';
+      return `const int ${constName} = ${device.pin};   // ${device.name} (device${index + 1})`;
     }).join('\n');
 
     return `// ==================== 设备配置 ====================
+// 设备数量: ${devices.length}
 ${constants}`;
   }
 
@@ -446,11 +454,10 @@ void handleBatchCommands(WiFiClient& client, String& request) {
   }
 
   String jsonData = request.substring(jsonStart);
-  Serial.println("提取的JSON数据: " + jsonData);
-  Serial.println("JSON数据长度: " + String(jsonData.length()));
+  // 不打印完整JSON以降低串口与内存压力
 
   // 解析JSON
-  DynamicJsonDocument doc(2048);
+  StaticJsonDocument<1536> doc; // 固定内存占用，避免堆碎片
   DeserializationError error = deserializeJson(doc, jsonData);
 
   if (error) {
@@ -509,13 +516,21 @@ void handleBatchCommands(WiFiClient& client, String& request) {
  * 处理状态查询
  */
 void handleStatusQuery(WiFiClient& client) {
-  sendCORSHeaders(client);
-
+  // CORS
   client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: application/json");
+  client.println("Access-Control-Allow-Origin: *");
+  client.println("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+  client.println("Access-Control-Allow-Headers: Content-Type");
   client.println("Connection: close");
   client.println();
-  client.println("{\\"status\\": \\"online\\", \\"devices\\": " + String(${devices.length}) + "}");
+
+  unsigned long uptime = millis() / 1000; // seconds
+  client.print("{\\"status\\": \\"online\\", \\"devices\\": ");
+  client.print(${devices.length});
+  client.print(", \\"uptimeSec\\": ");
+  client.print(uptime);
+  client.println("}");
 }
 
 /**
@@ -560,7 +575,9 @@ void sendError(WiFiClient& client, int code, String message) {
  * 发送CORS头
  */
 void sendCORSHeaders(WiFiClient& client) {
-  // CORS头在具体响应中发送
+  client.println("Access-Control-Allow-Origin: *");
+  client.println("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+  client.println("Access-Control-Allow-Headers: Content-Type");
 }`;
   }
 
@@ -595,14 +612,7 @@ void initializeWiFi() {
  * 映射设备ID：后端格式 -> Arduino格式
  */
 String mapDeviceId(String backendId) {
-  if (backendId == "pump1") return "inflate_pump_1";
-  if (backendId == "pump2") return "inflate_pump_2";
-  if (backendId == "pump3") return "exhaust_pump_1";
-  if (backendId == "pump4") return "exhaust_pump_2";
-  if (backendId == "valve1") return "valve_1";
-  if (backendId == "valve2") return "valve_2";
-
-  // 如果没有映射，返回原始ID
+  // 前后端统一使用配置页的设备ID，保持一致即可
   return backendId;
 }
 

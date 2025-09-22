@@ -234,7 +234,7 @@ function LoopPreview({ loop, devices }: { loop: ParallelLoop; devices: DeviceCon
         <ArrowPathIcon className="w-4 h-4 text-purple-500" />
         <span className="text-sm font-medium text-purple-700">{loop.name}</span>
         <span className="text-xs text-purple-600">
-          间隔 {Math.floor(loop.intervalMs / 1000)}秒
+          间隔 {(loop.intervalMs / 1000).toFixed(1)}秒
         </span>
       </div>
       

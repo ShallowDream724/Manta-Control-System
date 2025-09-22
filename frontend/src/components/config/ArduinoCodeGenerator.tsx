@@ -123,7 +123,7 @@ export default function ArduinoCodeGenerator({ devices, isOpen, onClose }: Ardui
                     <span className="font-medium">板型:</span> Arduino UNO R4 WiFi
                   </div>
                   <div className="text-sm">
-                    <span className="font-medium">WiFi:</span> FishControl_WiFi / fish2025
+                    <span className="font-medium">WiFi:</span> 使用后端配置或请求参数
                   </div>
                   <div className="text-sm">
                     <span className="font-medium">设备数量:</span> {devices.length}

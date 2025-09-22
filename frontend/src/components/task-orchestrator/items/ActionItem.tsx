@@ -32,7 +32,8 @@ export default function ActionItem({
   // 保存编辑
   const saveEdit = () => {
     const newValue = device.type === 'pwm' ? Number(editValue) : Boolean(editValue);
-    const newDuration = editDuration * 1000; // 转换为毫秒
+    // 统一到0.1s精度，避免浮点误差
+    const newDuration = Math.round(editDuration * 10) * 100; // 转换为毫秒（0.1s精度）
     
     const updatedAction = updateActionName({
       ...action,
@@ -130,11 +131,18 @@ export default function ActionItem({
               </label>
               <input
                 type="number"
+                inputMode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
                 min="0.1"
                 max="3600"
                 step="0.1"
                 value={editDuration}
-                onChange={(e) => setEditDuration(Number(e.target.value))}
+                onChange={(e) => {
+                  const v = e.target.value.replace(',', '.');
+                  const num = Number(v);
+                  const rounded = isNaN(num) ? 0 : Math.round(num * 10) / 10; // 立刻四舍五入到1位小数
+                  setEditDuration(rounded);
+                }}
                 className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>

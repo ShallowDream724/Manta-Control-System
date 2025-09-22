@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import DeviceConfigManager from '../config/DeviceConfigManager';
 import TaskEditor from '../task-orchestrator/TaskEditor';
-import DashboardDemo from '../demo/DashboardDemo';
+import ControlPanel from '../dashboard/ControlPanel';
 import SystemLogs from '../logs/SystemLogs';
 // 删除：避免多个Hook实例导致重复请求
 
@@ -37,7 +37,7 @@ export default function TabletLayout({}: TabletLayoutProps) {
   const renderPageContent = (page: string) => {
     switch (page) {
       case 'dashboard':
-        return <DashboardDemo />;
+        return <ControlPanel />;
       case 'tasks':
         return <TaskEditor />;
       case 'config':

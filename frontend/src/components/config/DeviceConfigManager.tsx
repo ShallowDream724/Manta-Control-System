@@ -77,9 +77,11 @@ export default function DeviceConfigManager() {
   // 重置为默认配置
   const handleResetToDefault = () => {
     const defaultDevices = resetToDefaultConfig();
+    const defaultGroups = DEFAULT_DEVICE_GROUPS;
     setDevices(defaultDevices);
-    // 立即保存最新数据
-    setTimeout(() => saveConfig(defaultDevices, groups), 0);
+    setGroups(defaultGroups);
+    // 立即保存最新数据（设备 + 分组）
+    setTimeout(() => saveConfig(defaultDevices, defaultGroups), 0);
   };
 
   // 添加新设备

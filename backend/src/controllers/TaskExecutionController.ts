@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Logger } from 'winston';
 import { TaskExecutionService } from '../services/TaskExecutionService';
-import type { Task } from '../types/task';
+import type { Task, Step, TaskAction, DelayAction, ParallelLoop, SubStep } from '../types/task';
 
 /**
  * 任务执行控制器
@@ -47,8 +47,11 @@ export class TaskExecutionController {
         return;
       }
 
+      // 对时间精度进行规范化（四舍五入到100ms = 0.1s）
+      const normalizedTask = this.normalizeTaskPrecision(task);
+
       // 开始执行任务
-      await this.taskExecutionService.executeTask(task, estimatedDuration);
+      await this.taskExecutionService.executeTask(normalizedTask, estimatedDuration);
       
       const newStatus = this.taskExecutionService.getScheduleStatus();
       
@@ -238,3 +241,63 @@ export class TaskExecutionController {
     }
   };
 }
+
+// =============== 辅助：统一时间精度到0.1s（100ms） ===============
+declare module '../types/task' {
+  interface Task {}
+}
+
+export class TaskPrecisionNormalizer {}
+
+export interface NormalizableDelay extends DelayAction {}
+
+export interface NormalizableLoop extends ParallelLoop {}
+
+// 添加到类内部
+export interface TaskExecutionController {
+  normalizeTaskPrecision: (task: Task) => Task;
+}
+
+TaskExecutionController.prototype.normalizeTaskPrecision = function(task: Task): Task {
+  const round100 = (ms: number) => Math.round(ms / 100) * 100;
+
+  const normalizeAction = (action: TaskAction | DelayAction): TaskAction | DelayAction => {
+    if ('type' in action && action.type === 'delay') {
+      const delay = action as DelayAction;
+      return {
+        ...delay,
+        delayMs: round100(delay.delayMs),
+        actions: delay.actions.map(normalizeAction),
+        parallelLoops: delay.parallelLoops.map(normalizeLoop)
+      } as DelayAction;
+    } else {
+      const a = action as TaskAction;
+      return {
+        ...a,
+        duration: round100(a.duration)
+      } as TaskAction;
+    }
+  };
+
+  const normalizeSubStep = (sub: SubStep): SubStep => ({
+    ...sub,
+    actions: sub.actions.map(normalizeAction)
+  });
+
+  const normalizeLoop = (loop: ParallelLoop): ParallelLoop => ({
+    ...loop,
+    intervalMs: round100(loop.intervalMs),
+    subSteps: loop.subSteps.map(normalizeSubStep)
+  });
+
+  const normalizeStep = (step: Step): Step => ({
+    ...step,
+    actions: step.actions.map(normalizeAction),
+    parallelLoops: step.parallelLoops.map(normalizeLoop)
+  });
+
+  return {
+    ...task,
+    steps: task.steps.map(normalizeStep)
+  };
+};

@@ -28,6 +28,7 @@ interface ExecutionState {
   stepStartTime: number;
   delays: DelayState[];
   loops: LoopState[];
+  directActionsExecuted: boolean; // 标记普通动作是否已执行
   isCompleted: boolean;
 }
 
@@ -147,6 +148,9 @@ export class TaskExecutionService {
       const now = Date.now();
       const commandsToExecute: TaskAction[] = [];
 
+      // 检查普通动作是否需要执行（只在步骤开始时执行一次）
+      this.checkDirectActions(now, commandsToExecute);
+
       // 检查延时是否到期
       this.checkDelays(now, commandsToExecute);
 
@@ -185,7 +189,8 @@ export class TaskExecutionService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch('http://192.168.4.1/api/commands', {
+      const baseUrl = process.env.ARDUINO_BASE_URL || 'http://192.168.4.1';
+      const response = await fetch(`${baseUrl}/api/commands`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -310,6 +315,7 @@ export class TaskExecutionService {
         stepStartTime: startTime,
         delays: [],
         loops: [],
+        directActionsExecuted: false,
         isCompleted: true
       };
     }
@@ -320,6 +326,7 @@ export class TaskExecutionService {
       stepStartTime: startTime,
       delays: this.initializeDelayStates(firstStep, startTime),
       loops: this.initializeLoopStates(firstStep, startTime),
+      directActionsExecuted: false,
       isCompleted: false
     };
   }
@@ -364,6 +371,30 @@ export class TaskExecutionService {
     }
 
     return loopStates;
+  }
+
+  /**
+   * 检查普通动作是否需要执行
+   */
+  private checkDirectActions(now: number, commandsToExecute: TaskAction[]): void {
+    if (!this.executionState || this.executionState.directActionsExecuted) return;
+
+    const currentStep = this.executionState.task.steps[this.executionState.stepIndex];
+    if (!currentStep) return;
+
+    // 收集步骤中的普通动作（非延时、非循环）
+    for (const action of currentStep.actions) {
+      if (!('type' in action)) {
+        // 这是普通动作
+        commandsToExecute.push(action as TaskAction);
+      }
+    }
+
+    // 标记普通动作已执行
+    if (commandsToExecute.length > 0) {
+      this.executionState.directActionsExecuted = true;
+      this.logger.info(`[SCHEDULER] Executing ${commandsToExecute.length} direct actions`);
+    }
   }
 
   /**
@@ -426,9 +457,10 @@ export class TaskExecutionService {
           }
 
           // 计算子步骤结束时间
-          const maxDuration = Math.max(...currentSubStep.actions.map(action =>
+          const durations = currentSubStep.actions.map(action =>
             ('type' in action) ? 0 : (action as TaskAction).duration
-          ));
+          );
+          const maxDuration = durations.length > 0 ? Math.max(...durations) : 0;
           loopState.subStepEndTime = now + maxDuration;
 
           this.logger.info(`[SCHEDULER] Loop ${loopState.iteration + 1}/${loopState.totalIterations}, SubStep ${loopState.subStep + 1}/${loopState.loop.subSteps.length}, Duration: ${maxDuration}ms`);

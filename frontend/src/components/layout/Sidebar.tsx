@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   HomeIcon, 
@@ -76,6 +76,36 @@ export default function Sidebar({
   isTablet = false,
   isDesktop = false
 }: SidebarProps) {
+  const [online, setOnline] = useState<boolean>(false);
+  const [uptimeSec, setUptimeSec] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    let timer: any;
+    const fetchStatus = async () => {
+      try {
+        const r = await fetch('/api/arduino/status');
+        const data = await r.json();
+        setOnline(!!data.online);
+        setUptimeSec(typeof data.uptimeSec === 'number' ? data.uptimeSec : undefined);
+      } catch {
+        setOnline(false);
+        setUptimeSec(undefined);
+      }
+    };
+    fetchStatus();
+    timer = setInterval(fetchStatus, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatUptime = (sec?: number) => {
+    if (!sec && sec !== 0) return '未知';
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = Math.floor(sec % 60);
+    if (h > 0) return `${h}小时${m}分`;
+    if (m > 0) return `${m}分${s}秒`;
+    return `${s}秒`;
+  };
   return (
     <nav className="h-full flex flex-col bg-white">
       {/* 头部 */}
@@ -200,16 +230,16 @@ export default function Sidebar({
         {!collapsed ? (
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Arduino已连接</span>
+              <div className={`w-2 h-2 ${online ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></div>
+              <span className="text-sm text-gray-600">Arduino{online ? '已连接' : '未连接'}</span>
             </div>
             <div className="text-xs text-gray-500">
-              运行时间: 2小时15分
+              运行时间: {online ? formatUptime(uptimeSec) : '未知'}
             </div>
           </div>
         ) : (
           <div className="flex justify-center">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className={`w-2 h-2 ${online ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></div>
           </div>
         )}
       </div>

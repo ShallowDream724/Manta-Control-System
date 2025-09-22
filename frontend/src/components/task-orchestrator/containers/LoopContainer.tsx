@@ -53,11 +53,11 @@ export default function LoopContainer({
   // 格式化时间显示
   const formatTime = (seconds: number): string => {
     if (seconds < 60) {
-      return `${seconds}秒`;
+      return `${(seconds).toFixed(1)}秒`;
     } else if (seconds < 3600) {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
-      return remainingSeconds > 0 ? `${minutes}分${remainingSeconds}秒` : `${minutes}分`;
+      return remainingSeconds > 0 ? `${minutes}分${remainingSeconds.toFixed(1)}秒` : `${minutes}分`;
     } else {
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
@@ -91,19 +91,26 @@ export default function LoopContainer({
                 value={editIterations}
                 onChange={(e) => setEditIterations(Number(e.target.value))}
                 className={`px-2 py-1 text-sm border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                  isMobile ? 'w-8' : 'w-16'
+                  isMobile ? 'w-14 no-spinner' : 'w-16'
                 }`}
               />
               <span className="text-sm text-purple-700">次，间隔</span>
               <input
                 type="number"
+                inputMode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
                 min="0"
                 max="3600"
                 step="0.1"
                 value={editIntervalSeconds}
-                onChange={(e) => setEditIntervalSeconds(Number(e.target.value))}
+                onChange={(e) => {
+                  const v = e.target.value.replace(',', '.');
+                  const num = Number(v);
+                  const rounded = isNaN(num) ? 0 : Math.round(num * 10) / 10; // 立刻四舍五入到1位小数
+                  setEditIntervalSeconds(rounded);
+                }}
                 className={`px-2 py-1 text-sm border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                  isMobile ? 'w-10' : 'w-20'
+                  isMobile ? 'w-20 no-spinner' : 'w-20'
                 }`}
               />
               <span className="text-sm text-purple-700">秒</span>
@@ -128,7 +135,7 @@ export default function LoopContainer({
           ) : (
             <div className="flex items-center space-x-2">
               <span className="font-medium text-purple-800">
-                {isMobile ? `${loop.iterations}次  ${Math.round(loop.intervalMs / 1000)}秒` : loop.name}
+                {isMobile ? `${loop.iterations}次  ${(loop.intervalMs / 1000).toFixed(1)}秒` : loop.name}
               </span>
               {!isMobile && (
                 <span className="text-sm text-purple-600">
@@ -218,7 +225,7 @@ export default function LoopContainer({
                   <ArrowPathIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">
                     {isMobile
-                      ? `${loop.iterations}次${Math.round(loop.intervalMs / 1000)}秒`
+                      ? `${loop.iterations}次${(loop.intervalMs / 1000).toFixed(1)}秒`
                       : `循环 ${loop.iterations} 次，间隔 ${formatTime(loop.intervalMs / 1000)}`
                     }
                   </p>

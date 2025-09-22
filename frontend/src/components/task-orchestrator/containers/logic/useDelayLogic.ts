@@ -78,9 +78,11 @@ export function useDelayLogic({
 
   // 保存延时编辑
   const saveDelayEdit = useCallback(() => {
+    // 统一到0.1s精度，避免浮点误差
+    const normalizedMs = Math.round(editDelaySeconds * 10) * 100; // (sec*10)->tenths, *100 -> ms
     const updatedDelay = updateDelayName({
       ...delay,
-      delayMs: editDelaySeconds * 1000
+      delayMs: normalizedMs
     });
     onUpdate(updatedDelay);
     setIsEditing(false);

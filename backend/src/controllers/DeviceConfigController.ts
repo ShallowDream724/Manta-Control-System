@@ -3,6 +3,8 @@ import { Logger } from 'winston';
 import { DeviceConfigService } from '../services/DeviceConfigService';
 import { ArduinoCodeGenerationService } from '../services/code-generation/CodeGenerationService';
 import type { DeviceConfig } from '../types/device';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * 设备配置控制器
@@ -343,35 +345,35 @@ export class DeviceConfigController {
     try {
       this.logger.info('Generating Arduino code...');
 
-      // 获取所有设备配置
-      const devices = await this.deviceConfigService.getAllConfigs();
+      // 使用前端传递的设备配置，而不是后端存储的配置
+      const { devices: frontendDevices, wifiConfig: frontendWifiConfig } = req.body;
 
-      if (devices.length === 0) {
+      if (!frontendDevices || !Array.isArray(frontendDevices) || frontendDevices.length === 0) {
         res.status(400).json({
           success: false,
-          error: 'No devices configured'
+          error: 'No devices provided in request body'
         });
         return;
       }
 
-      // 默认WiFi配置
-      const wifiConfig = {
-        ssid: 'FishControl_WiFi',
-        password: 'fish2025'
-      };
+      // 使用原始的设备ID（不再重写为 device_pwm_X/device_digital_X）
+      const devicesWithArduinoIds = frontendDevices;
+
+      // WiFi配置优先级：前端传入 > 配置文件 > 默认
+      const wifiConfig = await this.getWifiConfig(frontendWifiConfig);
 
       // 生成Arduino代码
-      const result = await this.codeGenerator.generateCode(devices, wifiConfig);
+      const result = await this.codeGenerator.generateCode(devicesWithArduinoIds, wifiConfig);
 
-      this.logger.info(`Arduino code generated successfully for ${devices.length} devices`);
+      this.logger.info(`Arduino code generated successfully for ${devicesWithArduinoIds.length} devices`);
 
       res.json({
         success: true,
         data: {
           code: result.code,
-          deviceCount: devices.length,
+          deviceCount: devicesWithArduinoIds.length,
           generatedAt: result.generatedAt.toISOString(),
-          devices: devices.map(d => ({
+          devices: devicesWithArduinoIds.map(d => ({
             id: d.id,
             name: d.name,
             type: d.type,
@@ -390,4 +392,64 @@ export class DeviceConfigController {
       });
     }
   };
+
+  /**
+   * 读取WiFi配置（前端传入 > config/devices.json > 默认值）
+   */
+  private async getWifiConfig(frontendWifiConfig?: { ssid?: string; password?: string }) {
+    // 1) 前端传入
+    if (frontendWifiConfig?.ssid) {
+      return {
+        ssid: frontendWifiConfig.ssid,
+        password: frontendWifiConfig.password || ''
+      };
+    }
+
+    // 2) 配置文件
+    try {
+      const configPath = path.join('config', 'devices.json');
+      const raw = await fs.readFile(configPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed?.wifiConfig?.ssid) {
+        return {
+          ssid: String(parsed.wifiConfig.ssid),
+          password: String(parsed.wifiConfig.password || '')
+        };
+      }
+    } catch (e) {
+      // 忽略读取失败，走默认
+      this.logger.warn('No wifiConfig found in config/devices.json, using defaults');
+    }
+
+    // 3) 默认
+    return {
+      ssid: 'FishControl_WiFi',
+      password: 'fish2025'
+    };
+  }
+
+  /**
+   * 为设备生成标准化的Arduino ID
+   */
+  private generateArduinoIds(devices: DeviceConfig[]): DeviceConfig[] {
+    const pwmCount = { count: 0 };
+    const digitalCount = { count: 0 };
+
+    return devices.map(device => {
+      let arduinoId: string;
+
+      if (device.type === 'pwm') {
+        pwmCount.count++;
+        arduinoId = `device_pwm_${pwmCount.count}`;
+      } else {
+        digitalCount.count++;
+        arduinoId = `device_digital_${digitalCount.count}`;
+      }
+
+      return {
+        ...device,
+        id: arduinoId
+      };
+    });
+  }
 }

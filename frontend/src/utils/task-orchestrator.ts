@@ -117,7 +117,7 @@ export function createTask(name?: string): Task {
 export function updateActionName(action: TaskAction, device: DeviceConfig): TaskAction {
   const isPwm = device.type === 'pwm';
   const valueText = isPwm ? `${action.value}%功率` : (action.value ? '开启' : '关闭');
-  const durationText = `${action.duration / 1000}秒`;
+  const durationText = `${(action.duration / 1000).toFixed(1)}秒`;
   
   return {
     ...action,
@@ -332,10 +332,10 @@ function validateSubStep(subStep: SubStep, devices: DeviceConfig[], path: string
  * 格式化时间
  */
 export function formatTime(seconds: number): string {
-  if (seconds < 60) return `${seconds}秒`;
+  if (seconds < 60) return `${seconds.toFixed(1)}秒`;
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return remainingSeconds > 0 ? `${minutes}分${remainingSeconds}秒` : `${minutes}分钟`;
+  return remainingSeconds > 0 ? `${minutes}分${remainingSeconds.toFixed(1)}秒` : `${minutes}分钟`;
 }
 
 /**

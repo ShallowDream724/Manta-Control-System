@@ -16,6 +16,8 @@ import { DeviceConfigController } from './controllers/DeviceConfigController';
 import { TaskExecutionController } from './controllers/TaskExecutionController';
 import { ArduinoLogController } from './controllers/ArduinoLogController';
 import { createDeviceRoutes } from './routes/deviceRoutes';
+import { createArduinoStatusRoutes } from './routes/arduinoStatusRoutes';
+import { ArduinoStatusController } from './controllers/ArduinoStatusController';
 import { createDeviceConfigRoutes } from './routes/deviceConfigRoutes';
 import { createTaskExecutionRoutes } from './routes/taskExecutionRoutes';
 import { createArduinoLogRoutes } from './routes/arduinoLogRoutes';
@@ -121,12 +123,14 @@ async function initializeServices(): Promise<void> {
     const deviceConfigController = new DeviceConfigController(deviceConfigService, logger);
     const taskExecutionController = new TaskExecutionController(taskExecutionService, logger, unifiedLogService);
     const arduinoLogController = new ArduinoLogController(unifiedLogService, logger);
+    const arduinoStatusController = new ArduinoStatusController(logger);
 
     // 设置路由
     app.use('/api/devices', createDeviceRoutes(deviceController));
     app.use('/api/device-configs', createDeviceConfigRoutes(deviceConfigController));
     app.use('/api/task-execution', createTaskExecutionRoutes(taskExecutionController));
     app.use('/api/arduino-logs', createArduinoLogRoutes(arduinoLogController));
+    app.use('/api/arduino', createArduinoStatusRoutes(arduinoStatusController));
 
     // 静态文件服务 - 提供前端文件
     const frontendDistPath = path.join(__dirname, '../../frontend/dist');

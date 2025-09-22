@@ -5,6 +5,7 @@
 
 import { EventEmitter } from 'events';
 import winston from 'winston';
+// @ts-ignore - mdns-js没有类型定义
 import * as mdns from 'mdns-js';
 import * as os from 'os';
 

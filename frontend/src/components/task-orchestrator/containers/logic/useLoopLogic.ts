@@ -51,10 +51,12 @@ export function useLoopLogic({ loop, devices, onUpdate }: UseLoopLogicProps): Us
 
   // 保存循环编辑
   const saveLoopEdit = useCallback(() => {
+    // 统一到0.1s精度，避免浮点误差
+    const normalizedMs = Math.round(editIntervalSeconds * 10) * 100; // (sec*10)->tenths, *100 -> ms
     const updatedLoop = updateLoopName({
       ...loop,
       iterations: editIterations,
-      intervalMs: editIntervalSeconds * 1000
+      intervalMs: normalizedMs
     });
     onUpdate(updatedLoop);
     setIsEditing(false);

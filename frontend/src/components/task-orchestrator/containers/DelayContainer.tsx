@@ -54,18 +54,18 @@ export default function DelayContainer({
   // 格式化时间显示
   const formatTime = (seconds: number): string => {
     if (seconds < 60) {
-      return `${seconds}秒`;
+      return `${(seconds).toFixed(1)}秒`;
     } else if (seconds < 3600) {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
-      return remainingSeconds > 0 ? `${minutes}分${remainingSeconds}秒` : `${minutes}分`;
+      return remainingSeconds > 0 ? `${minutes}分${remainingSeconds.toFixed(1)}秒` : `${minutes}分`;
     } else {
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
       const remainingSeconds = seconds % 60;
       let result = `${hours}时`;
       if (minutes > 0) result += `${minutes}分`;
-      if (remainingSeconds > 0) result += `${remainingSeconds}秒`;
+      if (remainingSeconds > 0) result += `${remainingSeconds.toFixed(1)}秒`;
       return result;
     }
   };
@@ -89,12 +89,19 @@ export default function DelayContainer({
               <span className="text-sm font-medium text-orange-800">延时</span>
               <input
                 type="number"
+                inputMode="decimal"
+                pattern="[0-9]*[.,]?[0-9]*"
                 min="0.1"
                 max="3600"
                 step="0.1"
                 value={editDelaySeconds}
-                onChange={(e) => setEditDelaySeconds(Number(e.target.value))}
-                className="w-20 px-2 py-1 text-sm border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                onChange={(e) => {
+                  const v = e.target.value.replace(',', '.');
+                  const num = Number(v);
+                  const rounded = isNaN(num) ? 0 : Math.round(num * 10) / 10; // 立刻四舍五入到1位小数
+                  setEditDelaySeconds(rounded);
+                }}
+                className={`w-20 px-2 py-1 text-sm border border-orange-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 ${isMobile ? 'no-spinner' : ''}`}
               />
               <span className="text-sm text-orange-700">秒</span>
               
@@ -118,7 +125,7 @@ export default function DelayContainer({
           ) : (
             <div className="flex items-center space-x-2">
               <span className="font-medium text-orange-800">
-                {isMobile ? `延时 ${Math.round(delay.delayMs / 1000)} 秒` : delay.name}
+                {isMobile ? `延时 ${(delay.delayMs / 1000).toFixed(1)} 秒` : delay.name}
               </span>
               {!isMobile && (
                 <span className="text-sm text-orange-600">
